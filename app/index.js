@@ -4,7 +4,7 @@ import ThemedScreen from '@/themes/themedComponents/ThemedScreen';
 import Footer from '@/components/Footer';
 import HomeScreenHeader from '@/components/homeScreen/HomeScreenHeader';
 import { Link } from 'expo-router';
-import { Button } from '@rneui/themed';
+import { Button, Text } from '@rneui/themed';
 
 export default function HomeScreen() {
   return (
@@ -13,14 +13,14 @@ export default function HomeScreen() {
         {/* App Header */}
         <HomeScreenHeader />
         <View style={styles.container}>
+          <Text h1 style={{ marginBottom: 20 }}>
+            Go Alchemy
+          </Text>
+          <Text style={{ marginBottom: 20 }}>
+            Welcome to your Go Problems training app!
+          </Text>
           <Link href='/problems' asChild>
-            <Button title='Problems' />
-          </Link>
-          <Link href='/settings' asChild>
-            <Button title='Settings' />
-          </Link>
-          <Link href='/about' asChild>
-            <Button title='About' />
+            <Button title='Problems' style={{ width: 200 }} />
           </Link>
         </View>
         <Footer />
@@ -36,6 +36,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    gap: 16
+    gap: 16,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 });

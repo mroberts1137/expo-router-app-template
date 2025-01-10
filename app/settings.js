@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import { Switch, ListItem, Button } from '@rneui/themed';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -55,40 +55,42 @@ const SettingsScreen = () => {
 
   return (
     <ThemedScreen>
-      <ListItem bottomDivider>
-        <ListItem.Content>
-          <ListItem.Title>Notifications</ListItem.Title>
-          <ListItem.Subtitle>Receive notifications</ListItem.Subtitle>
-        </ListItem.Content>
-        <Switch
-          value={notificationsEnabled}
-          onValueChange={handleToggleNotifications}
-        />
-      </ListItem>
+      <ScrollView>
+        <ListItem bottomDivider>
+          <ListItem.Content>
+            <ListItem.Title>Notifications</ListItem.Title>
+            <ListItem.Subtitle>Receive notifications</ListItem.Subtitle>
+          </ListItem.Content>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={handleToggleNotifications}
+          />
+        </ListItem>
 
-      <ListItem bottomDivider>
-        <ListItem.Content>
-          <ListItem.Title>Dark Mode</ListItem.Title>
-        </ListItem.Content>
-        <ToggleTheme />
-      </ListItem>
+        <ListItem bottomDivider>
+          <ListItem.Content>
+            <ListItem.Title>Dark Mode</ListItem.Title>
+          </ListItem.Content>
+          <ToggleTheme />
+        </ListItem>
 
-      <ListItem bottomDivider>
-        <ListItem.Content>
-          <ListItem.Title>Sound Effects</ListItem.Title>
-        </ListItem.Content>
-        <Switch
-          value={sfxEnabled}
-          onValueChange={() => dispatch(toggleSfx())}
-        />
-      </ListItem>
+        <ListItem bottomDivider>
+          <ListItem.Content>
+            <ListItem.Title>Sound Effects</ListItem.Title>
+          </ListItem.Content>
+          <Switch
+            value={sfxEnabled}
+            onValueChange={() => dispatch(toggleSfx())}
+          />
+        </ListItem>
 
-      <ListItem bottomDivider>
-        <ListItem.Content>
-          <ListItem.Title>Reset settings to default</ListItem.Title>
-        </ListItem.Content>
-        <Button title='Reset' onPress={() => dispatch(resetSettings())} />
-      </ListItem>
+        <ListItem bottomDivider>
+          <ListItem.Content>
+            <ListItem.Title>Reset settings to default</ListItem.Title>
+          </ListItem.Content>
+          <Button title='Reset' onPress={() => dispatch(resetSettings())} />
+        </ListItem>
+      </ScrollView>
     </ThemedScreen>
   );
 };
