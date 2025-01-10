@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  useWindowDimensions
+} from 'react-native';
 import Svg, { Line, Circle, G } from 'react-native-svg';
 import { BoardState, BoardRange, Stone, Coordinate } from '@/types/board';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
@@ -23,18 +28,39 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     useState<Coordinate | null>(null);
   const [isValidMove, setIsValidMove] = useState<boolean>(false);
 
-  const screenWidth = Dimensions.get('window').width;
-  const padding = 20;
-  const boardWidth = screenWidth - padding * 2;
-  const spacing = boardWidth / (size - 1);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  // const screenWidth = Dimensions.get('window').width;
+  // const padding = 20;
+  // const boardWidth = screenWidth - padding * 2;
+  // const spacing = boardWidth / (size - 1);
 
   // Calculate visible area
   const startX = range?.startX ?? 0;
   const startY = range?.startY ?? 0;
   const endX = range?.endX ?? size - 1;
   const endY = range?.endY ?? size - 1;
-  const visibleWidth = (endX - startX + 1) * spacing;
-  const visibleHeight = (endY - startY + 1) * spacing;
+
+  // Calculate number of intersections in visible area
+  const visibleWidth = endX - startX;
+  const visibleHeight = endY - startY;
+
+  // Calculate the board size based on the smaller screen dimension
+  const containerSize = Math.min(screenWidth, screenHeight) - 40; // 40 for padding
+
+  // Calculate spacing based on visible area rather than full board
+  const spacing = containerSize / Math.max(visibleWidth, visibleHeight);
+
+  // Scale coordinates to container size
+  const scaleCoordinate = (coord: number, isX: boolean): number => {
+    const offset = isX ? startX : startY;
+    return (coord - offset) * spacing;
+  };
+
+  const unscaleCoordinate = (pixel: number, isX: boolean): number => {
+    const offset = isX ? startX : startY;
+    return Math.round(pixel / spacing) + offset;
+  };
 
   // MODEL A
   // State for intersection highlight
@@ -97,8 +123,8 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     touchX: number,
     touchY: number
   ): Coordinate => {
-    const x = Math.round(touchX / spacing);
-    const y = Math.round(touchY / spacing);
+    const x = unscaleCoordinate(touchX, true);
+    const y = unscaleCoordinate(touchY, true);
     return {
       x: Math.max(startX, Math.min(endX, x)),
       y: Math.max(startY, Math.min(endY, y))
@@ -106,15 +132,13 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
   };
 
   const isValidIntersection = (x: number, y: number): boolean => {
-    // For now, just check if the intersection is empty
     return boardState[y * size + x] === 0;
   };
 
   const handleTouchMove = (event: any) => {
     const touch = event.nativeEvent;
-    // const rect = event.currentTarget.getBoundingClientRect();
-    const x = touch.locationX - padding;
-    const y = touch.locationY - padding;
+    const x = touch.locationX;
+    const y = touch.locationY;
 
     const intersection = getNearestIntersection(x, y);
     setHoveredIntersection(intersection);
@@ -127,7 +151,6 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     }
     setHoveredIntersection(null);
   };
-  //////////
 
   const renderGrid = () => {
     const lines = [];
@@ -137,10 +160,10 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
       lines.push(
         <Line
           key={`v${x}`}
-          x1={x * spacing}
+          x1={scaleCoordinate(x, true)}
           y1={0}
-          x2={x * spacing}
-          y2={visibleHeight}
+          x2={scaleCoordinate(x, true)}
+          y2={containerSize}
           stroke='black'
           strokeWidth='1'
         />
@@ -153,9 +176,9 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
         <Line
           key={`h${y}`}
           x1={0}
-          y1={y * spacing}
-          x2={visibleWidth}
-          y2={y * spacing}
+          y1={scaleCoordinate(y, false)}
+          x2={containerSize}
+          y2={scaleCoordinate(y, false)}
           stroke='black'
           strokeWidth='1'
         />
@@ -175,9 +198,9 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
           stones.push(
             <Circle
               key={`${x}-${y}`}
-              cx={x * spacing}
-              cy={y * spacing}
-              r={spacing * 0.4}
+              cx={scaleCoordinate(x, true)}
+              cy={scaleCoordinate(y, false)}
+              r={spacing * 0.48}
               fill={stone === 1 ? 'black' : 'white'}
               stroke='black'
               strokeWidth={stone === 2 ? 1 : 0}
@@ -200,8 +223,8 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
           starPoints.push(
             <Circle
               key={`star-${x}-${y}`}
-              cx={x * spacing}
-              cy={y * spacing}
+              cx={scaleCoordinate(x, true)}
+              cy={scaleCoordinate(y, false)}
               r={3}
               fill='black'
             />
@@ -213,7 +236,6 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     return starPoints;
   };
 
-  // Render highlight lines
   const renderHighlightLines = () => {
     if (!hoveredIntersection) return null;
 
@@ -222,22 +244,20 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
 
     return (
       <G>
-        {/* Vertical highlight line */}
         <Line
-          x1={x * spacing}
+          x1={scaleCoordinate(x, true)}
           y1={0}
-          x2={x * spacing}
-          y2={visibleHeight}
+          x2={scaleCoordinate(x, true)}
+          y2={containerSize}
           stroke={color}
           strokeWidth='2'
           opacity='0.5'
         />
-        {/* Horizontal highlight line */}
         <Line
           x1={0}
-          y1={y * spacing}
-          x2={visibleWidth}
-          y2={y * spacing}
+          y1={scaleCoordinate(y, false)}
+          x2={containerSize}
+          y2={scaleCoordinate(y, false)}
           stroke={color}
           strokeWidth='2'
           opacity='0.5'
@@ -245,39 +265,17 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
       </G>
     );
   };
-  // const renderHighlight = () => {
-  //   if (!highlightIntersection) return null;
-
-  //   const { x, y, isValid } = highlightIntersection;
-  //   const color = isValid ? 'green' : 'red';
-
-  //   return (
-  //     <G>
-  //       <Line
-  //         x1={(x - startX) * spacing}
-  //         y1={0}
-  //         x2={(x - startX) * spacing}
-  //         y2={visibleHeight}
-  //         stroke={color}
-  //         strokeWidth={2}
-  //       />
-  //       <Line
-  //         x1={0}
-  //         y1={(y - startY) * spacing}
-  //         x2={visibleWidth}
-  //         y2={(y - startY) * spacing}
-  //         stroke={color}
-  //         strokeWidth={2}
-  //       />
-  //     </G>
-  //   );
-  // };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { width: containerSize, height: containerSize }
+      ]}
+    >
       <Svg
-        width={visibleWidth}
-        height={visibleHeight}
+        width={containerSize}
+        height={containerSize}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
@@ -288,19 +286,20 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
       </Svg>
     </View>
   );
-  // return (
-  //   <GestureDetector gesture={gesture}>
-  //     <View style={styles.container}>
-  //       <Svg width={visibleWidth} height={visibleHeight}>
-  //         {renderGrid()}
-  //         {renderStarPoints()}
-  //         {renderHighlight()}
-  //         {renderStones()}
-  //       </Svg>
-  //     </View>
-  //   </GestureDetector>
-  // );
 };
+// return (
+//   <GestureDetector gesture={gesture}>
+//     <View style={styles.container}>
+//       <Svg width={visibleWidth} height={visibleHeight}>
+//         {renderGrid()}
+//         {renderStarPoints()}
+//         {renderHighlight()}
+//         {renderStones()}
+//       </Svg>
+//     </View>
+//   </GestureDetector>
+// );
+// };
 
 const styles = StyleSheet.create({
   container: {
