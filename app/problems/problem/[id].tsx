@@ -27,8 +27,8 @@ export default function ProblemScreen() {
   const range = {
     startX: 0,
     startY: 0,
-    endX: 8,
-    endY: 8
+    endX: 5,
+    endY: 5
   };
 
   // const handlePlaceStone = (x: number, y: number): boolean => {

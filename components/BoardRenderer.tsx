@@ -28,38 +28,41 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     useState<Coordinate | null>(null);
   const [isValidMove, setIsValidMove] = useState<boolean>(false);
 
+  // Add padding to accommodate full stones at edges
+  const STONE_PADDING = 0.5; // Half a spacing unit for padding
+  const LINE_EXTENSION = 0.3; // How far lines extend beyond the last intersection
+
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  // const screenWidth = Dimensions.get('window').width;
-  // const padding = 20;
-  // const boardWidth = screenWidth - padding * 2;
-  // const spacing = boardWidth / (size - 1);
-
-  // Calculate visible area
+  // Calculate visible range
   const startX = range?.startX ?? 0;
   const startY = range?.startY ?? 0;
   const endX = range?.endX ?? size - 1;
   const endY = range?.endY ?? size - 1;
+  const visibleWidth = endX - startX + 1;
+  const visibleHeight = endY - startY + 1;
 
-  // Calculate number of intersections in visible area
-  const visibleWidth = endX - startX;
-  const visibleHeight = endY - startY;
+  // Calculate board size and spacing based on the visible range
+  const availableSize = Math.min(screenWidth, screenHeight) - 40; // 40 for padding
+  const boardSize = availableSize;
 
-  // Calculate the board size based on the smaller screen dimension
-  const containerSize = Math.min(screenWidth, screenHeight) - 40; // 40 for padding
+  // Calculate spacing based on visible range
+  const spacingX = boardSize / (visibleWidth - 1 || 1);
+  const spacingY = boardSize / (visibleHeight - 1 || 1);
+  const spacing = Math.min(spacingX, spacingY);
 
-  // Calculate spacing based on visible area rather than full board
-  const spacing = containerSize / Math.max(visibleWidth, visibleHeight);
+  // Adjust board size to maintain square shape
+  const actualBoardSize = spacing * (Math.max(visibleWidth, visibleHeight) - 1);
 
-  // Scale coordinates to container size
-  const scaleCoordinate = (coord: number, isX: boolean): number => {
-    const offset = isX ? startX : startY;
-    return (coord - offset) * spacing;
+  const transformCoordinates = (x: number, y: number): [number, number] => {
+    return [(x - startX) * spacing, (y - startY) * spacing];
   };
 
-  const unscaleCoordinate = (pixel: number, isX: boolean): number => {
-    const offset = isX ? startX : startY;
-    return Math.round(pixel / spacing) + offset;
+  const inverseTransformCoordinates = (
+    x: number,
+    y: number
+  ): [number, number] => {
+    return [Math.round(x / spacing) + startX, Math.round(y / spacing) + startY];
   };
 
   // MODEL A
@@ -123,8 +126,7 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     touchX: number,
     touchY: number
   ): Coordinate => {
-    const x = unscaleCoordinate(touchX, true);
-    const y = unscaleCoordinate(touchY, true);
+    const [x, y] = inverseTransformCoordinates(touchX, touchY);
     return {
       x: Math.max(startX, Math.min(endX, x)),
       y: Math.max(startY, Math.min(endY, y))
@@ -137,10 +139,10 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
 
   const handleTouchMove = (event: any) => {
     const touch = event.nativeEvent;
-    const x = touch.locationX;
-    const y = touch.locationY;
-
-    const intersection = getNearestIntersection(x, y);
+    const intersection = getNearestIntersection(
+      touch.locationX,
+      touch.locationY
+    );
     setHoveredIntersection(intersection);
     setIsValidMove(isValidIntersection(intersection.x, intersection.y));
   };
@@ -157,13 +159,15 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
 
     // Vertical lines
     for (let x = startX; x <= endX; x++) {
+      const [x1, y1] = transformCoordinates(x, startY);
+      const [x2, y2] = transformCoordinates(x, endY);
       lines.push(
         <Line
           key={`v${x}`}
-          x1={scaleCoordinate(x, true)}
+          x1={x1}
           y1={0}
-          x2={scaleCoordinate(x, true)}
-          y2={containerSize}
+          x2={x2}
+          y2={actualBoardSize}
           stroke='black'
           strokeWidth='1'
         />
@@ -172,13 +176,15 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
 
     // Horizontal lines
     for (let y = startY; y <= endY; y++) {
+      const [x1, y1] = transformCoordinates(startX, y);
+      const [x2, y2] = transformCoordinates(endX, y);
       lines.push(
         <Line
           key={`h${y}`}
           x1={0}
-          y1={scaleCoordinate(y, false)}
-          x2={containerSize}
-          y2={scaleCoordinate(y, false)}
+          y1={y1}
+          x2={actualBoardSize}
+          y2={y2}
           stroke='black'
           strokeWidth='1'
         />
@@ -195,12 +201,13 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
       for (let x = startX; x <= endX; x++) {
         const stone = boardState[y * size + x];
         if (stone !== 0) {
+          const [cx, cy] = transformCoordinates(x, y);
           stones.push(
             <Circle
               key={`${x}-${y}`}
-              cx={scaleCoordinate(x, true)}
-              cy={scaleCoordinate(y, false)}
-              r={spacing * 0.48}
+              cx={cx}
+              cy={cy}
+              r={spacing * 0.47}
               fill={stone === 1 ? 'black' : 'white'}
               stroke='black'
               strokeWidth={stone === 2 ? 1 : 0}
@@ -215,19 +222,15 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
 
   const renderStarPoints = () => {
     const starPoints = [];
-    const starPositions = size === 19 ? [3, 9, 15] : [3, size - 4];
+    const starPositions =
+      size === 19 ? [3, 9, 15] : size === 13 ? [3, 6, 9] : [3, size - 4];
 
     for (const x of starPositions) {
       for (const y of starPositions) {
         if (x >= startX && x <= endX && y >= startY && y <= endY) {
+          const [cx, cy] = transformCoordinates(x, y);
           starPoints.push(
-            <Circle
-              key={`star-${x}-${y}`}
-              cx={scaleCoordinate(x, true)}
-              cy={scaleCoordinate(y, false)}
-              r={3}
-              fill='black'
-            />
+            <Circle key={`star-${x}-${y}`} cx={cx} cy={cy} r={3} fill='black' />
           );
         }
       }
@@ -240,24 +243,25 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     if (!hoveredIntersection) return null;
 
     const { x, y } = hoveredIntersection;
+    const [hx, hy] = transformCoordinates(x, y);
     const color = isValidMove ? '#00ff00' : '#ff0000';
 
     return (
       <G>
         <Line
-          x1={scaleCoordinate(x, true)}
+          x1={hx}
           y1={0}
-          x2={scaleCoordinate(x, true)}
-          y2={containerSize}
+          x2={hx}
+          y2={actualBoardSize}
           stroke={color}
           strokeWidth='2'
           opacity='0.5'
         />
         <Line
           x1={0}
-          y1={scaleCoordinate(y, false)}
-          x2={containerSize}
-          y2={scaleCoordinate(y, false)}
+          y1={hy}
+          x2={actualBoardSize}
+          y2={hy}
           stroke={color}
           strokeWidth='2'
           opacity='0.5'
@@ -270,12 +274,12 @@ export const BoardRenderer: React.FC<BoardRendererProps> = ({
     <View
       style={[
         styles.container,
-        { width: containerSize, height: containerSize }
+        { width: actualBoardSize, height: actualBoardSize }
       ]}
     >
       <Svg
-        width={containerSize}
-        height={containerSize}
+        width={actualBoardSize}
+        height={actualBoardSize}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
