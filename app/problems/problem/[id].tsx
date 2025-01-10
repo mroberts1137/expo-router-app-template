@@ -24,12 +24,16 @@ export default function ProblemScreen() {
   const availableHeight =
     windowHeight - insets.top - insets.bottom - CONTROL_PANEL_HEIGHT;
 
-  const range = {
-    startX: 0,
-    startY: 0,
-    endX: 5,
-    endY: 5
-  };
+  // const range = undefined;
+
+  // Top-left corner (9x9)
+  const range = { startX: 0, startY: 0, endX: 8, endY: 8 };
+
+  // Middle section (5x5)
+  // const range = { startX: 7, startY: 7, endX: 11, endY: 11 };
+
+  // Bottom-right corner
+  // const range = { startX: 14, startY: 14, endX: 18, endY: 18 };
 
   // const handlePlaceStone = (x: number, y: number): boolean => {
   //   // Check if the move is valid (for now, just check if empty)

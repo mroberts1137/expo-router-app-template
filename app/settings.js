@@ -6,13 +6,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { scheduleNotifications } from '@/services/NotificationService';
 import ToggleTheme from '@/components/ToggleTheme';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetSettings, toggleSfx } from '@/store/settingsSlice';
+import { resetSettings, toggleSfx, toggleHaptics } from '@/store/settingsSlice';
 import ThemedScreen from '@/themes/themedComponents/ThemedScreen';
 
 const SettingsScreen = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const dispatch = useDispatch();
   const sfxEnabled = useSelector((state) => state.settings?.sfxEnabled ?? true);
+  const hapticsEnabled = useSelector(
+    (state) => state.settings?.hapticsEnabled ?? true
+  );
 
   useEffect(() => {
     loadNotificationSettings();
@@ -81,6 +84,16 @@ const SettingsScreen = () => {
           <Switch
             value={sfxEnabled}
             onValueChange={() => dispatch(toggleSfx())}
+          />
+        </ListItem>
+
+        <ListItem bottomDivider>
+          <ListItem.Content>
+            <ListItem.Title>Vibration</ListItem.Title>
+          </ListItem.Content>
+          <Switch
+            value={hapticsEnabled}
+            onValueChange={() => dispatch(toggleHaptics())}
           />
         </ListItem>
 
