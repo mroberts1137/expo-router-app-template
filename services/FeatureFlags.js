@@ -1,11 +1,9 @@
 class FeatureFlags {
-  static isExperimental = process.env.EXPO_PUBLIC_APP_ENV === 'experimental';
+  static isExperimental = process.env.EXPO_PUBLIC_APP_ENV === 'development';
 
   static isFeatureEnabled(featureName) {
     const features = {
-      userLogin: this.isExperimental,
-      fileUpload: this.isExperimental,
-      rewardedAds: this.isExperimental
+      userLogin: this.isExperimental
     };
     return features[featureName] || false;
   }

@@ -4,7 +4,7 @@ import { Switch, ListItem, Button } from '@rneui/themed';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { scheduleNotifications } from '@/services/NotificationService';
-import ToggleTheme from '@/components/ToggleTheme';
+import ToggleTheme from '@/components/buttons/ToggleTheme';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetSettings, toggleSfx, toggleHaptics } from '@/store/settingsSlice';
 import ThemedScreen from '@/themes/themedComponents/ThemedScreen';
@@ -17,6 +17,7 @@ const SettingsScreen = () => {
     (state) => state.settings?.hapticsEnabled ?? true
   );
 
+  // TODO: Refactor ToggleNotifications to separate component
   useEffect(() => {
     loadNotificationSettings();
   }, []);

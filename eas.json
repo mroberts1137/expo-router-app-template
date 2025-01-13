@@ -6,13 +6,15 @@
   "build": {
     "production": {
       "autoIncrement": true,
+      "environment": "production",
       "env": {}
     },
-    "experimental": {
+    "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       },
+      "environment": "preview",
       "env": {}
     },
     "development": {
@@ -21,13 +23,7 @@
       "android": {
         "buildType": "apk"
       },
-      "env": {}
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
+      "environment": "development",
       "env": {}
     }
   },

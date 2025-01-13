@@ -24,19 +24,6 @@ export default function RootLayout() {
                 }}
               />
               <Tabs.Screen
-                name='problems'
-                options={{
-                  title: 'Problems',
-                  tabBarIcon: ({ color }) => (
-                    <Icon
-                      type='material-community'
-                      name='puzzle'
-                      color={color}
-                    />
-                  )
-                }}
-              />
-              <Tabs.Screen
                 name='settings'
                 options={{
                   title: 'Settings',

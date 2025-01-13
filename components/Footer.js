@@ -1,13 +1,13 @@
 import { makeStyles, Text } from '@rneui/themed';
 import { View } from 'react-native';
-import { version } from '@/package.json';
+import { name, version } from '@/package.json';
 
 const Footer = () => {
   const styles = useStyles();
 
   return (
     <View style={styles.footer}>
-      <Text style={styles.footerText}>{`Kiwi Cards v${version}`}</Text>
+      <Text style={styles.footerText}>{`${name} v${version}`}</Text>
       <Text style={styles.footerText}>
         © {new Date().getFullYear()} All rights reserved
       </Text>

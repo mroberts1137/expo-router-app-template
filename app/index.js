@@ -12,19 +12,18 @@ export default function HomeScreen() {
     <ErrorBoundary>
       <ThemedScreen>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* App Header */}
+          {/* App Header Logo */}
           <HomeScreenHeader />
+
+          {/* App Title */}
           <View style={styles.container}>
             <Text h1 style={{ marginBottom: 20 }}>
-              Go Alchemy
+              APP_NAME
             </Text>
-            <Text style={{ marginBottom: 20 }}>
-              Welcome to your Go Problems training app!
-            </Text>
-            <Link href='/problems' asChild>
-              <Button title='Problems' style={{ width: 200 }} />
-            </Link>
+            <Text style={{ marginBottom: 20 }}>APP_DESCRIPTION</Text>
           </View>
+
+          {/* Footer */}
           <Footer />
         </ScrollView>
       </ThemedScreen>
@@ -34,7 +33,8 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    padding: 10
+    padding: 10,
+    flex: 1
   },
   container: {
     flex: 1,

@@ -1,5 +1,6 @@
 import { Image, makeStyles } from '@rneui/themed';
 import { ActivityIndicator, View } from 'react-native';
+const header_logo = require('../../assets/images/header_logo.png');
 
 const HomeScreenHeader = () => {
   const styles = useStyles();
@@ -8,7 +9,7 @@ const HomeScreenHeader = () => {
     <View style={styles.header}>
       <Image
         style={styles.logo}
-        source={require('../../assets/images/header_logo.png')}
+        source={header_logo}
         PlaceholderContent={<ActivityIndicator />}
         resizeMethod='contain'
       />
@@ -19,11 +20,6 @@ const HomeScreenHeader = () => {
 const useStyles = makeStyles((theme) => ({
   header: {
     alignItems: 'center'
-    // width: '100%',
-    // height: 100,
-    // borderColor: 'black',
-    // borderWidth: 1,
-    // backgroundColor: 'lightgray'
   },
   logo: {
     width: 320,
