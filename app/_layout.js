@@ -37,7 +37,11 @@ export default function RootLayout() {
                 options={{
                   title: 'About',
                   tabBarIcon: ({ color }) => (
-                    <Icon type='material-community' name='cog' color={color} />
+                    <Icon
+                      type='material-community'
+                      name='information'
+                      color={color}
+                    />
                   )
                 }}
               />

@@ -1,13 +1,17 @@
 import { makeStyles, Text } from '@rneui/themed';
 import { View } from 'react-native';
 import { name, version } from '@/package.json';
+import { textFormatter } from '../utils/textFormatter';
+import Constants from 'expo-constants';
 
 const Footer = () => {
   const styles = useStyles();
 
   return (
     <View style={styles.footer}>
-      <Text style={styles.footerText}>{`${name} v${version}`}</Text>
+      <Text style={styles.footerText}>{`${textFormatter(name)} v${
+        Constants?.expoConfig?.version || '1.0.0'
+      }`}</Text>
       <Text style={styles.footerText}>
         © {new Date().getFullYear()} All rights reserved
       </Text>
